@@ -1,0 +1,204 @@
+---
+title: "Deliverable-3"
+output: html_notebook
+Group: 2
+Author: Roohi Firdous, Fabian Sanchez
+# R Programming Language
+---
+
+## **Market Mix Modelling**
+
+1\. How is sales related to week numbers?
+
+Hint: Calculate sales using price and number of units sold and group by Day_of_week. Which day_of_week has max sales.
+
+2\. How does TV spending(investment) affect sales? Can you quantify it?
+
+Hint: Company has invested for 2-week,5-time impressions of Tv promotion, total investment is \$15000
+
+Number of population reach is 25% of 50000. Out of 25% only 12% population buy \$1500 sales.
+
+3\. How does Radio spending affect sales? Can you quantify it?
+
+Hint: Company has invested for 1-week,3-time impressions of Tv promotion, total investment is \$15000
+
+Number of population reach is 10% of 5000. Out of 10% only 5% population buy \$500 sales.
+
+4\. Calculate the ROI for each investment
+
+**Import the CSV file:**
+
+```{r}
+library('tidyverse')
+library(shinydashboard)
+library(shiny)
+library('ggplot2')
+```
+
+```{r}
+SalesData <- read.csv('Ecommerce_Sales_Data.csv', header=T, na.strings='')
+SalesData
+```
+
+**Checking Columns with N/A or null**
+
+```{r}
+colSums(is.na(SalesData))
+# No N/A or NULL fields to correct it
+```
+
+### **1. How is sales related to week numbers?**
+
+Hint: Calculate sales using price and number of units sold and group by Day_of_week. Which day_of_week has max sales.
+
+```{r}
+# First, a table is created only with the purchases made
+Purchases <- SalesData %>% filter(event_type=='Purchase')
+head(Purchases)
+```
+
+```{r}
+graph1 <- ggplot(data=Purchases, aes(x=Day_of_Week, y=price, fill=category))+geom_bar(stat="identity", colour="black", position="dodge")+theme(plot.title = element_text(hjust = 0.5, face="bold"))+labs(title = "Sales vs Day of Week")
+graph1+ xlab("Day of Week") + ylab("Price")
+
+# In the graph, we can see that Sunday is the day with more sales for Electronics, and Thursday for Appliances
+```
+
+```{r}
+graph1 <- ggplot(data=Purchases, aes(x=Day_of_Week, y=sub_category2))+geom_point(aes(colour = category, size = User_Score))+theme(plot.title = element_text(hjust = 0.5, face="bold"))+labs(title = "Sales vs Day of Week")
+graph1+ xlab("Day of Week") + ylab("Product")
+```
+
+### **2. How does TV spending(investment) affect sales? Can you quantify it?**
+
+Hint: Company has invested for 2-week, 5-time impressions of Tv promotion, total investment is \$15000
+
+Number of population reach is 25% of 50000. Out of 25% only 12% population buy \$1500 sales.
+
+```{r}
+# Calculating the population:
+Population <- 50000 * (25/100)
+
+# 12 % of population buy $1,500
+Buyers <- Population * (12/100)
+SalesAfterTV_ADV <- 1500
+
+# Getting the pre-sales before TV advertisements 
+SalesBeforeTV_ADV <- sum(Purchases$price)
+
+# Total investment in TV advertisments = $15,000
+InvestmentTV <- 15000
+
+# Calculating the profit
+Profit <- SalesAfterTV_ADV - InvestmentTV
+
+# Calculation of sales growth rate
+GrowTV <- 100*round(SalesAfterTV_ADV / SalesBeforeTV_ADV, 2)
+
+
+# Print the calcules
+print(paste("Sales Before TV Advertisments =","$",SalesBeforeTV_ADV))
+print(paste("Sales After TV Advertisments =","$",SalesAfterTV_ADV))
+print(paste("Sales Growth Rate =",GrowTV, "%"))
+print("------------------------------------------")
+print(paste("Profit =","$",Profit))
+print("------------------------------------------")
+print("After investment 15,000  the new sales = 1,500")
+print("***** The company lost $13.500 *****")
+```
+
+```{r}
+x = c(12500, 1500, 10009.39, 1500, -13500)
+labels=c("Population", "Buyers", "SalesBefore", "SalesAfter", "Profit")
+graph2 <- barplot(x, names.arg=labels, border="black", col=c("lightblue", "lightblue", "red", "red", "blue"), xlab="", ylab="$", main="Sales with TV advertisements")
+text(graph2, paste(x) ,cex=0.9)
+```
+
+```{r}
+set.seed(5642)                            
+graph3 <- data.frame(name = c("Population", "Buyers", "SalesBeforeTV", 
+                              "SalesAfterTV", "Profit") ,
+                     value = c(12500, 1500, 10009.39, 1500, -13500))
+library("ggplot2")
+ 
+plot<-ggplot(graph3,aes(name,value)) +
+geom_bar(stat = "identity", fill="lightblue") +
+geom_text(aes(label = signif(value)), nudge_y = 3) +
+labs(title = "Sales with TV advertisements") +
+xlab("") + ylab("$")
+plot
+```
+
+3.  **How does Radio spending affect sales? Can you quantify it?**
+
+    Hint: Company has invested for 1-week,3-time impressions of Tv promotion, total investment is \$15000
+
+    Number of population reach is 10% of 5000. Out of 10% only 5% population buy \$500 sales.
+
+```{r}
+# Calculating the population:
+Population <- 50000 * (10/100)
+
+# 5 % of population buy $500
+Buyers <- Population * (5/100)
+SalesAfterRadio_ADV <- 500
+
+# Getting the pre-sales before Radio advertisements 
+SalesBeforeRadio_ADV <- sum(Purchases$price)
+
+# Total investment in Radio advertisments = $15,000
+InvestmentRD <- 15000
+
+# Calculating the profit
+Profit <- SalesAfterRadio_ADV - InvestmentRD
+
+# Calculation of sales growth rate
+GrowRD <- 100 * round(SalesAfterRadio_ADV / SalesBeforeRadio_ADV, 2)
+
+# Print the calcules
+print(paste("Sales Before Radio Advertisments =","$",SalesBeforeRadio_ADV))
+print(paste("Sales After Radio Advertisments =","$",SalesAfterRadio_ADV))
+print(paste("Sales Growth Rate =",GrowRD, "%"))
+print("------------------------------------------")
+print(paste("Profit =","$",Profit))
+print("------------------------------------------")
+print("After investment 15,000  the new sales = 500")
+print("***** The company lost $14.500 *****")
+```
+
+```{r}
+set.seed(5642)                            
+graph4 <- data.frame(name = c("Population", "Buyers", "SalesBeforeRadio", 
+                              "SalesAfterRadio", "Profit") ,
+                     value = c(5000, 250, 10009.39, 500, -14500))
+library("ggplot2")
+ 
+plot<-ggplot(graph4,aes(name,value)) +
+geom_bar(stat = "identity", fill="cyan") +
+geom_text(aes(label = signif(value)), nudge_y = 3) +
+labs(title = "Sales with RADIO advertisements") +
+xlab("") + ylab("$")
+plot
+```
+
+### **4.** Calculate the ROI for each investment
+
+```{r}
+#ROI = ((Sales Growth-Marketing Cost) / Marketing Cost) * 100%
+
+SalesGrowthTV <- SalesAfterTV_ADV - SalesBeforeTV_ADV
+ROI_TV <- round(SalesGrowthTV / InvestmentTV *100, 2)
+
+SalesGrowthRD <- SalesAfterRadio_ADV - SalesBeforeRadio_ADV
+ROI_RD <- round(SalesGrowthRD / InvestmentRD *100, 2)
+
+print(paste("ROI for TV Investment =",ROI_TV, "%"))
+print(paste("ROI for Radio Investment =",ROI_RD, "%"))
+```
+
+```{r}
+x = c(ROI_TV, ROI_RD)
+labels=c("ROI TV", "ROI RADIO")
+graph2 <- barplot(x, names.arg=labels, border="black", col=c("lightblue","red"), xlab="", ylab="$", main="ROI for advertisements")
+text(graph2, paste(x) ,cex=1)
+```
