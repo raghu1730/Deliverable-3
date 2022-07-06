@@ -1,0 +1,104 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
+
+```{r}
+library(readxl)
+library(dplyr)
+library(ggplot2)
+library(stringr)
+```
+
+```{r}
+dl<-read.csv('C:/Users/5545290/Desktop/Files/Classes/5.R.Programming.Language/Project/Ecommerce_Sales_Data.csv', header = T, na.strings = '')
+df=data.frame(dl)
+print(df)
+```
+
+```{r}
+df$category=as.factor(df$category)
+df$sub_category1=as.factor(df$sub_category1)
+df$sub_category2=as.factor(df$sub_category2)
+df$brand=as.factor(df$brand)
+summary(df)
+```
+```{r}
+dl1<-rename(df,Unit_sold = User_Score)
+dl1
+```
+
+```{r}
+dl1$Sales<-cbind(dl$price * dl1$Unit_sold)
+dl1
+```
+```{r}
+# How is sales related to week numbers?
+
+library('ggplot2')
+library(RColorBrewer)
+ggplot(data=dl1, aes(x=Day_of_Week, fill=Sales))+geom_bar()+theme(plot.title=element_text(hjust=0.5, face="bold"))+labs((title="Day of Week x Sales"))
+```
+
+#ANALYSIS:
+According to the graph, Sunday has the best sales numbers.
+
+```{r}
+# How does TV spending(investment) affect sales? Can you quantify it?
+# Hint: Company has invested for 2-week,5-time impressions of Tv promotion, total investment is $15000
+# Number of population reach is 25% of 50000. Out of 25% only 12% population buy $1500 sales.
+
+#Let's find the ROI by assuming that 15000 people have visited the site in a timeframe of two weeks
+
+store= select(dl1, category, sub_category1, sub_category2)
+store
+```
+
+
+```{r}
+store$sales_Expection_tv<-cbind(dl1$Sales * 25)/ 100
+store
+```
+
+
+```{r}
+store$reached_sales_tv<-cbind(store$sales_Expection_tv * 12) / 100
+store
+```
+
+
+```{r}
+store$sales_percentage_tv<-cbind((store$reached_sales_tv - store$sales_Expection_tv)/store$sales_Expection_tv*100)
+store
+```
+```{r}
+store$ROI_tv<-cbind(store$sales_percentage_tv) / 15000
+store
+```
+
+#ANALYSIS:
+As we can see the TV investment did not reach their objectives. In this case we can affirm the TV investment did not affect the sales at all. 
+
+```{r}
+# How does Radio spending affect sales? Can you quantify it?
+# Hint: Company has invested for 1-week,3-time impressions of Tv promotion, total investment is $15000
+# Number of population reach is 10% of 5000. Out of 10% only 5% population buy $500 sales.
+
+# Similarly as with TV, we now caclulate the expected sales, reached sales and ROI for radio.
+
+store$sales_Expection_radio<-cbind(dl1$Sales * 10)/ 100
+store$reached_sales_radio<-cbind(store$sales_Expection_radio * 5) / 100
+store$sales_percentage_radio<-cbind((store$reached_sales_radio - store$sales_Expection_radio) / store$sales_Expection_radio * 100)
+store$ROI_radio<-cbind(store$sales_percentage_radio) / 15000
+store
+
+
+```
+
+#ANALYSIS:
+As we can see the radio investment also did not reach their objectives. In this case we can affirm the radio investment did not affect the sales at all. 
+
